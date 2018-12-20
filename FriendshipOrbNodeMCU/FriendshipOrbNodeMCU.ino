@@ -62,6 +62,7 @@ long lastMsg = 0;
 char msg[50];
 int value = 0;
 unsigned long lightStartedTime = 0;
+int lastPosition = 0;
 
 void setup() {
   Serial.begin(115200);
@@ -72,10 +73,25 @@ void setup() {
 
   pinMode(INPUT_PIN, INPUT_PULLUP);
 
-  Serial.println('showing strip');
-
   strip.begin(); // Initialize pins for output
   strip.show();  // Turn all LEDs off ASAP
+
+  setInitialColor();
+
+}
+
+void setInitialColor() {
+
+  if (!connectedToWifi) {
+    int val = 340 % 255 ;
+    myEnc.write(val);
+    lastPosition = val;
+    currentColor = Wheel(lastPosition%255);
+  } else {
+    myEnc.write(0);
+    lastPosition = 0;
+    currentColor = Wheel(0);
+  }
 }
 
 void connectToMQTT() {
@@ -200,16 +216,19 @@ void checkMQTTChannel()
     reconnect();
   } else {
     client.loop();
-
   }
 }
+
+
 
 void loop() {
 
   long newPosition = myEnc.read();
 
-  currentColor = Wheel(newPosition%255);
-
+  if (newPosition != lastPosition) {
+    currentColor = Wheel(newPosition%255);
+  }
+  
   checkMQTTChannel();
 
   if(digitalRead(INPUT_PIN) == 0)
