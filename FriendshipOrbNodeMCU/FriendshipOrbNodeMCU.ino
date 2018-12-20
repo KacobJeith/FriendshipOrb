@@ -17,16 +17,17 @@ static const uint8_t D9   = 3;
 static const uint8_t D10  = 1;
 
 Encoder myEnc(D5, D4);    
-long oldPosition  = -999; 
+long oldPosition  = -999;
+bool connectedToWifi = false;
 
 // Update these with values suitable for your network.
-const char* ssid = "....";
-const char* password = ".....";
-const char* mqtt_server = "192.168.0.161";
+const char* ssid = "perfectporkchop";
+const char* password = "N0morehotdogs";
+const char* mqtt_server = "68.183.121.10";
 
 #define MQTT_PORT 1883
 
-#define MQTT_CLIENT_NAME "Rocks"
+#define MQTT_CLIENT_NAME "JKFam1_Ven"
 
 uint32_t currentColor = 0xFF00FF;
 #define LIGHT_ON_DURATION 1000
@@ -64,14 +65,27 @@ unsigned long lightStartedTime = 0;
 
 void setup() {
   Serial.begin(115200);
-  setup_wifi();
-  client.setServer(mqtt_server, MQTT_PORT);
-  client.setCallback(callback);
+
+  setup_wifi_timeout(5000);
+
+  connectToMQTT();  
 
   pinMode(INPUT_PIN, INPUT_PULLUP);
 
+  Serial.println('showing strip');
+
   strip.begin(); // Initialize pins for output
   strip.show();  // Turn all LEDs off ASAP
+}
+
+void connectToMQTT() {
+  if (connectedToWifi) {
+    client.setServer(mqtt_server, MQTT_PORT);
+    client.setCallback(callback);
+  } else {
+    Serial.println("Skipping MQTT Connection and running in local mode");
+  }
+  
 }
 
 void setup_wifi() {
@@ -95,6 +109,37 @@ void setup_wifi() {
   Serial.println(WiFi.localIP());
 }
 
+void setup_wifi_timeout(unsigned int timeout) {
+
+  delay(10);
+  // We start by connecting to a WiFi network
+  Serial.println();
+  Serial.print("Connecting to ");
+  Serial.println(ssid);
+
+  WiFi.begin(ssid, password);
+
+  unsigned int startTime = millis();   
+
+  while (WiFi.status() != WL_CONNECTED && (millis() - startTime) < timeout) {
+    delay(500);
+    Serial.print(".");
+  }
+
+  if (WiFi.status() == WL_CONNECTED) {
+    Serial.println("");
+    Serial.println("WiFi connected");
+    Serial.println("IP address: ");
+    Serial.println(WiFi.localIP());
+    connectedToWifi = true;
+  } else {
+    Serial.println("");
+    Serial.println("WiFi failed to connect");
+    connectedToWifi = false;
+  }
+  
+}
+
 void callback(char* topic, byte* payload, unsigned int length) {
   Serial.print("Message arrived [");
   Serial.print(topic);
@@ -112,8 +157,8 @@ void callback(char* topic, byte* payload, unsigned int length) {
 
 void reconnect() {
   // Loop until we're reconnected
-  while (!client.connected()) 
-  {
+  // while (!client.connected()) 
+  // {
     Serial.print("Attempting MQTT connection...");
     // Attempt to connect
     if (client.connect(MQTT_CLIENT_NAME)) {
@@ -122,13 +167,14 @@ void reconnect() {
     } 
     else 
     {
-      Serial.print("failed, rc=");
-      Serial.print(client.state());
-      Serial.println(" try again in 5 seconds");
+      // Serial.print("failed, rc=");
+      // Serial.print(client.state());
+      // Serial.println(" try again in 5 seconds");
       // Wait 5 seconds before retrying
-      delay(5000);
+      // delay(5000);
+      Serial.println("Failed MQTT Connection");
     }
-  }
+  // }
 }
 
 void clearAllPixels()
@@ -147,20 +193,24 @@ void lightMainPixelColor()
   }
 }
 
-void loop() {
-
-  long newPosition = myEnc.read();
-  if (newPosition != oldPosition) {
-    oldPosition = newPosition;
-    Serial.println(newPosition);
-  }
-  currentColor = Wheel(newPosition%255);
-
+void checkMQTTChannel() 
+{
   if (!client.connected()) 
   {
     reconnect();
+  } else {
+    client.loop();
+
   }
-  client.loop();
+}
+
+void loop() {
+
+  long newPosition = myEnc.read();
+
+  currentColor = Wheel(newPosition%255);
+
+  checkMQTTChannel();
 
   if(digitalRead(INPUT_PIN) == 0)
   {
@@ -168,13 +218,7 @@ void loop() {
     client.publish(OUT_TOPIC, msg);
   }
 
-  //if(millis() - lightStartedTime < LIGHT_ON_DURATION)
-  //{
-    lightMainPixelColor();
-  //}
-  //else
-  //{
-    //clearAllPixels();
-  //}
+  lightMainPixelColor();
+
   strip.show();
 }
