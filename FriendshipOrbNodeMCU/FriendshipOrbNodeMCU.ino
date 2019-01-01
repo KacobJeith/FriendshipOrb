@@ -25,9 +25,6 @@ Encoder myEnc(D5, D4);
 long oldPosition  = -999;
 bool connectedToWifi = false;
 
-// Update these with values suitable for your network.
-const char* ssid = "..."; //"perfectporkchop";
-const char* password = "..."; //"N0morehotdogs";
 const char* mqtt_server = "68.183.121.10";
 
 #define MQTT_PORT 1883
@@ -121,47 +118,7 @@ void connectToMQTT() {
   }
 }
 
-void setup_wifi() {
 
-  delay(10);
-  // We start by connecting to a WiFi network
-  Serial.println();
-  Serial.print("Connecting to ");
-  Serial.println(ssid);
-
-  WiFi.begin(ssid, password);
-
-  while (WiFi.status() != WL_CONNECTED) {
-    delay(500);
-    Serial.print(".");
-  }
-
-  Serial.println("");
-  Serial.println("WiFi connected");
-  Serial.println("IP address: ");
-  Serial.println(WiFi.localIP());
-}
-
-void setup_wifi_timeout(unsigned int timeout) {
-
-  delay(10);
-  // We start by connecting to a WiFi network
-  Serial.println();
-  Serial.print("Connecting to ");
-  Serial.println(ssid);
-
-  WiFi.begin(ssid, password);
-
-  unsigned int startTime = millis();   
-
-  while (WiFi.status() != WL_CONNECTED && (millis() - startTime) < timeout) {
-    delay(500);
-    Serial.print(".");
-  }
-
-  handleWifiStatus();
-  
-}
 
 void handleWifiStatus() {
   if (WiFi.status() == WL_CONNECTED) {
@@ -233,8 +190,6 @@ void checkMQTTChannel()
     client.loop();
   }
 }
-
-
 
 void loop() {
 
