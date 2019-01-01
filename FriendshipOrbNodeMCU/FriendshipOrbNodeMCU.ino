@@ -27,13 +27,13 @@ const char* mqtt_server = "68.183.121.10";
 
 #define MQTT_PORT 1883
 
-#define MQTT_CLIENT_NAME "JKFam1_Ven"
+#define MQTT_CLIENT_NAME "JKFam1_Mar"
 
 uint32_t currentColor = 0xFF00FF;
 #define LIGHT_ON_DURATION 1000
 
-#define IN_TOPIC "friendship"
-#define OUT_TOPIC "friendship"
+#define IN_TOPIC "KeithFamily"
+#define OUT_TOPIC "KeithFamily"
 
 #define INPUT_PIN D3
 
