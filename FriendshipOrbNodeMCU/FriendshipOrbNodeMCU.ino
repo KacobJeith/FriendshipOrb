@@ -4,6 +4,11 @@
 #include <SPI.h>    
 #include <Encoder.h>
 
+//needed for library
+#include <DNSServer.h>
+#include <ESP8266WebServer.h>
+#include <WiFiManager.h>         //https://github.com/tzapu/WiFiManager
+
 static const uint8_t D0   = 16;
 static const uint8_t D1   = 5;
 static const uint8_t D2   = 4;
@@ -21,8 +26,8 @@ long oldPosition  = -999;
 bool connectedToWifi = false;
 
 // Update these with values suitable for your network.
-const char* ssid = "perfectporkchop";
-const char* password = "N0morehotdogs";
+const char* ssid = "..."; //"perfectporkchop";
+const char* password = "..."; //"N0morehotdogs";
 const char* mqtt_server = "68.183.121.10";
 
 #define MQTT_PORT 1883
@@ -67,7 +72,8 @@ int lastPosition = 0;
 void setup() {
   Serial.begin(115200);
 
-  setup_wifi_timeout(5000);
+  // setup_wifi_timeout(5000);
+  setup_wifi_managed();
 
   connectToMQTT();  
 
@@ -77,6 +83,18 @@ void setup() {
   strip.show();  // Turn all LEDs off ASAP
 
   setInitialColor();
+
+}
+
+void setup_wifi_managed() {
+
+  Serial.println();
+  Serial.print("Launching Wifi Manager");
+
+  WiFiManager wifiManager;
+  wifiManager.autoConnect("Friendship Orb");
+
+  handleWifiStatus();
 
 }
 
@@ -101,7 +119,6 @@ void connectToMQTT() {
   } else {
     Serial.println("Skipping MQTT Connection and running in local mode");
   }
-  
 }
 
 void setup_wifi() {
@@ -142,6 +159,11 @@ void setup_wifi_timeout(unsigned int timeout) {
     Serial.print(".");
   }
 
+  handleWifiStatus();
+  
+}
+
+void handleWifiStatus() {
   if (WiFi.status() == WL_CONNECTED) {
     Serial.println("");
     Serial.println("WiFi connected");
@@ -153,7 +175,6 @@ void setup_wifi_timeout(unsigned int timeout) {
     Serial.println("WiFi failed to connect");
     connectedToWifi = false;
   }
-  
 }
 
 void callback(char* topic, byte* payload, unsigned int length) {
@@ -172,9 +193,8 @@ void callback(char* topic, byte* payload, unsigned int length) {
 }
 
 void reconnect() {
-  // Loop until we're reconnected
-  // while (!client.connected()) 
-  // {
+
+  if (connectedToWifi) {
     Serial.print("Attempting MQTT connection...");
     // Attempt to connect
     if (client.connect(MQTT_CLIENT_NAME)) {
@@ -183,14 +203,9 @@ void reconnect() {
     } 
     else 
     {
-      // Serial.print("failed, rc=");
-      // Serial.print(client.state());
-      // Serial.println(" try again in 5 seconds");
-      // Wait 5 seconds before retrying
-      // delay(5000);
       Serial.println("Failed MQTT Connection");
     }
-  // }
+  }
 }
 
 void clearAllPixels()
