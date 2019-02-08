@@ -29,7 +29,7 @@ const char* mqtt_server = "68.183.121.10";
 
 #define MQTT_PORT 1883
 
-#define MQTT_CLIENT_NAME "JKFam1_Mar"
+#define MQTT_CLIENT_NAME "JKFam1_Ven"
 
 uint32_t currentColor = 0xFF00FF;
 #define LIGHT_ON_DURATION 1000
@@ -69,7 +69,6 @@ int lastPosition = 0;
 void setup() {
   Serial.begin(115200);
 
-  // setup_wifi_timeout(5000);
   setup_wifi_managed();
 
   connectToMQTT();  
@@ -89,7 +88,7 @@ void setup_wifi_managed() {
   Serial.print("Launching Wifi Manager");
 
   WiFiManager wifiManager;
-  wifiManager.autoConnect("Friendship Orb");
+  wifiManager.autoConnect("Friendship Venus", "friendship");
 
   handleWifiStatus();
 
