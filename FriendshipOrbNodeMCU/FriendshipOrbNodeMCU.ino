@@ -63,6 +63,7 @@ Adafruit_DotStar strip = Adafruit_DotStar(NUMPIXELS, DATAPIN, CLOCKPIN);
 
 uint32_t Wheel(byte WheelPos) {
   WheelPos = 255 - WheelPos;
+
   if(WheelPos < 85) {
     return strip.Color(255 - WheelPos * 3, 0, WheelPos * 3);
   }
@@ -117,21 +118,21 @@ void setup() {
 
   EEPROM.begin(EEPROM_SIZE);
 
-  for(int i = 0; i < CUSTOM_STRING_BUFFER_SIZE; i++)
-  {
-    friendshipGroup[i] = EEPROM.read(i);
-  }
-  for(int i = CUSTOM_STRING_BUFFER_SIZE; i < 2*CUSTOM_STRING_BUFFER_SIZE; i++)
-  {
-    orbName[i - CUSTOM_STRING_BUFFER_SIZE] = EEPROM.read(i);
-  }
-
-  WiFiManagerParameter custom_friend_group("Friendship Group", "Friendship Group", friendshipGroup, 40);
-  WiFiManagerParameter orb_name_parameter("Orb Name", "Orb Name", orbName, 40);
-
-  //add all your parameters here
-  wifiManager.addParameter(&custom_friend_group);
-  wifiManager.addParameter(&orb_name_parameter);
+//  for(int i = 0; i < CUSTOM_STRING_BUFFER_SIZE; i++)
+//  {
+//    friendshipGroup[i] = EEPROM.read(i);
+//  }
+//  for(int i = CUSTOM_STRING_BUFFER_SIZE; i < 2*CUSTOM_STRING_BUFFER_SIZE; i++)
+//  {
+//    orbName[i - CUSTOM_STRING_BUFFER_SIZE] = EEPROM.read(i);
+//  }
+//
+//  WiFiManagerParameter custom_friend_group("Friendship Group", "Friendship Group", friendshipGroup, 40);
+//  WiFiManagerParameter orb_name_parameter("Orb Name", "Orb Name", orbName, 40);
+//
+//  //add all your parameters here
+//  wifiManager.addParameter(&custom_friend_group);
+//  wifiManager.addParameter(&orb_name_parameter);
 
   
   pinMode(INPUT_PIN, INPUT_PULLUP);
@@ -139,22 +140,22 @@ void setup() {
   strip.begin(); // Initialize pins for output
   strip.show();  // Turn all LEDs off ASAP
 
-  setup_wifi();
-
-
-  strcpy(friendshipGroup, custom_friend_group.getValue());
-  strcpy(orbName, orb_name_parameter.getValue());
-
-
-  Serial.print("The Group: ");
-  Serial.println(friendshipGroup);
-  Serial.print("The Name: ");
-  Serial.println(orbName);
-
-  SaveGroupAndOrbNameToEEPROM();
-
-  client.setServer(mqtt_server, MQTT_PORT);
-  client.setCallback(callback);
+//  setup_wifi();
+//
+//
+//  strcpy(friendshipGroup, custom_friend_group.getValue());
+//  strcpy(orbName, orb_name_parameter.getValue());
+//
+//
+//  Serial.print("The Group: ");
+//  Serial.println(friendshipGroup);
+//  Serial.print("The Name: ");
+//  Serial.println(orbName);
+//
+//  SaveGroupAndOrbNameToEEPROM();
+//
+//  client.setServer(mqtt_server, MQTT_PORT);
+//  client.setCallback(callback);
 }
 
 
@@ -462,13 +463,13 @@ void doPressedButtonActions(long newPosition)
 
 void loop() {
 
-  if (!client.connected()) 
-  {
-    reconnect();
-  }
-  client.loop();
+//  if (!client.connected()) 
+//  {
+//    reconnect();
+//  }
+//  client.loop();
 
-  runDNS();
+//  runDNS();
 
   long newPosition = readEncoderAndSetColor();
 
